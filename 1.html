@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style>
+	#circles {width: 512px;height:512px;position:relative;margin:0 auto}
+	</style>
+</head>
+<body>
+	<canvas id="canvas" style="display:none"></canvas>
+	<div id="circles"></div>
+
+	<script>
+		const canvas = document.getElementById('canvas')
+		const context = canvas.getContext('2d')
+		const circles = document.getElementById('circles')
+		const image = new Image()
+		var rate = 1
+
+		image.src = '1.png'
+		image.onload = function () {
+			canvas.width = image.width
+			canvas.height = image.height
+			rate = circles.offsetWidth / canvas.width
+			context.drawImage(this, 0, 0, image.width, image.height)
+			createCircles(circles, 0, 0, image.width * rate, image.height * rate)
+		}
+
+		document.addEventListener('mouseover', (e) => {
+			const target = e.target
+			const width = parseFloat(target.style.width)
+			const height = parseFloat(target.style.height)
+			const x = target.offsetLeft
+			const y = target.offsetTop
+
+			if (target.className === 'circle' && width >= rate * 2) {
+				seperateCircle(target, x, y, width, height)
+			}
+		})
+
+		function seperateCircle(target, x, y, width, height) {
+			const w = width / 2
+			const h = height / 2
+
+			createCircles(target, x, y, w, h)
+			createCircles(target, x + w, y, w, h)
+			createCircles(target, x, y + h, w, h)
+			createCircles(target, x + w, y + h, w, h)
+		}
+
+		function createCircles(target, x, y, width, height) {
+			const div = document.createElement('div')
+
+			div.className = 'circle'
+			div.style.float = 'left'
+			div.style.width = width + 'px'
+			div.style.height = height + 'px'
+			div.style.borderRadius = '50%'
+			div.style.backgroundColor = getAverageColor(x / rate, y / rate, width / rate, height / rate)
+
+			target.style.backgroundColor = ''
+			target.className = ''
+			target.appendChild(div)
+		}
+
+		function getAverageColor(x, y, width, height) {
+			const imageData = context.getImageData(x, y, width, height)
+			let red = 0
+			let green = 0
+			let blue = 0
+
+			// console.log(x, y, width, height)
+
+			for (let i = 0; i < imageData.data.length; i += 4) {
+				red += imageData.data[i]
+				green += imageData.data[i + 1]
+				blue += imageData.data[i + 2]
+			}
+
+			return 'rgb(' + (red % 255) + ',' + (green % 255) + ',' + (blue % 255) + ')'
+		}
+	</script>
+</body>
+</html>
